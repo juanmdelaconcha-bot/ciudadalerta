@@ -762,8 +762,6 @@ async function submitReport() {
   btn.disabled=true; sp.style.display='block'; lbl.textContent='Guardando…';
 
   try {
-    const {db, collection, addDoc, serverTimestamp} = window._fb;
-
     // 1. Compress photo to max 800px / 60% quality before storing in Firestore
     let photoUrl = null;
     if(fPhoto) {
