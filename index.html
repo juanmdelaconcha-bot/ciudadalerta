@@ -18,7 +18,6 @@ import { getAuth, onAuthStateChanged, signInWithPopup, signInWithEmailAndPasswor
   createUserWithEmailAndPassword, GoogleAuthProvider, signOut }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-// ── Firebase config ──
 const firebaseConfig = {
 apiKey: “AIzaSyDwRzvyVX55-km767B3SMfb5voCM_wrnJg”,
 authDomain: “denuncia-ciudadana-11d82.firebaseapp.com”,
@@ -33,13 +32,27 @@ const db       = getFirestore(app);
 const auth     = getAuth(app);
 const gProvider = new GoogleAuthProvider();
 
-// ── expose to global scope ──
+// ── Run initApp directly from module (avoids event timing issues) ──
+onAuthStateChanged(auth, user => {
+window._currentUser = user;
+if(typeof updateAuthUI === ‘function’) updateAuthUI(user);
+});
+
+const q = query(collection(db,‘denuncias’), orderBy(‘createdAt’,‘desc’));
+onSnapshot(q, snap => {
+window._reports = snap.docs.map(d => ({ firestoreId: d.id, …d.data() }));
+if(typeof onReportsUpdate === ‘function’) onReportsUpdate(window._reports);
+}, err => {
+console.error(‘Firestore error:’, err);
+if(typeof showToast === ‘function’) showToast(’Error: ’+err.message, ‘error’);
+});
+
 window._fb = { db, auth, gProvider,
 collection, addDoc, onSnapshot, query, orderBy, serverTimestamp,
 onAuthStateChanged, signInWithPopup, signInWithEmailAndPassword,
 createUserWithEmailAndPassword, signOut };
 
-window.dispatchEvent(new Event(‘firebase-ready’));
+window._fbReady = true;
 </script>
 
 <style>
@@ -449,36 +462,20 @@ let currentUser=null;
 let authMode='login';
 let fbReady=false;
 
-// ── WAIT FOR FIREBASE ──
-window.addEventListener('firebase-ready', initApp);
-
-function initApp() {
-  fbReady = true;
-  const { auth, onAuthStateChanged, db, collection, query, orderBy, onSnapshot } = window._fb;
-
-  // Auth state
-  onAuthStateChanged(auth, user => {
-    currentUser = user;
-    updateAuthUI(user);
-  });
-
-  // Init map
+// ── INIT MAP on DOM ready ──
+window.addEventListener('DOMContentLoaded', () => {
   map = L.map('map').setView([19.432,-99.136],13);
   L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
     {attribution:'© OpenStreetMap © CARTO',maxZoom:19}).addTo(map);
-
-  // Live listener — Firestore real-time
   setLoading(true);
-  const q = query(collection(db,'denuncias'), orderBy('createdAt','desc'));
-  onSnapshot(q, snap => {
-    reports = snap.docs.map(d => ({ firestoreId: d.id, ...d.data() }));
-    renderAll();
-    setLoading(false);
-  }, err => {
-    console.error(err);
-    showToast('Error al cargar denuncias: '+err.message, 'error');
-    setLoading(false);
-  });
+});
+
+// ── Called by Firebase module when data arrives ──
+function onReportsUpdate(newReports) {
+  reports = newReports;
+  fbReady = true;
+  renderAll();
+  setLoading(false);
 }
 
 // ── MAP ──
@@ -558,6 +555,7 @@ function doFilter(type,btn) {
 
 // ── AUTH UI ──
 function updateAuthUI(user) {
+  currentUser = user;
   const chip=document.getElementById('user-chip');
   const btnLogin=document.getElementById('btn-login-header');
   const btnNew=document.getElementById('btn-new');
@@ -768,7 +766,7 @@ function compressImage(dataUrl, maxPx, quality) {
 }
 
 async function submitReport() {
-  if(!fbReady){showToast('Firebase no está listo','error');return;}
+  if(!window._fbReady){showToast('Conectando, espera un momento…','error');return;}
   const title=document.getElementById('f-title').value.trim();
   if(!fType){showToast('Selecciona una categoría','error');return;}
   if(!fSubcat){showToast('Elige el tipo específico de incidente','error');return;}
@@ -805,8 +803,8 @@ async function submitReport() {
       date: new Date().toISOString().slice(0,10),
       votes: 0,
       photoUrl,
-      userId: currentUser?.uid||'anonymous',
-      userEmail: currentUser?.email||'anónimo',
+      userId: window._currentUser?.uid||'anonymous',
+      userEmail: window._currentUser?.email||'anónimo',
       createdAt: serverTimestamp()
     };
 
