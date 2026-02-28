@@ -12,7 +12,7 @@
 <!-- Firebase -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp }
+import { getFirestore, collection, addDoc, onSnapshot, query, serverTimestamp }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged, signInWithPopup, signInWithEmailAndPassword,
   createUserWithEmailAndPassword, GoogleAuthProvider, signOut }
@@ -38,7 +38,7 @@ window._currentUser = user;
 if(typeof updateAuthUI === ‘function’) updateAuthUI(user);
 });
 
-const q = query(collection(db,‘denuncias’), orderBy(‘createdAt’,‘desc’));
+const q = query(collection(db,‘denuncias’));
 onSnapshot(q, snap => {
 window._reports = snap.docs.map(d => ({ firestoreId: d.id, …d.data() }));
 if(typeof onReportsUpdate === ‘function’) onReportsUpdate(window._reports);
@@ -48,7 +48,7 @@ if(typeof showToast === ‘function’) showToast(’Error: ’+err.message, ‘
 });
 
 window._fb = { db, auth, gProvider,
-collection, addDoc, onSnapshot, query, orderBy, serverTimestamp,
+collection, addDoc, onSnapshot, query, serverTimestamp,
 onAuthStateChanged, signInWithPopup, signInWithEmailAndPassword,
 createUserWithEmailAndPassword, signOut };
 
