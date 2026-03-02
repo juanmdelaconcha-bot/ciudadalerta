@@ -333,12 +333,29 @@ auth.onAuthStateChanged(user => {
 });
 
 function doLogin() {
-  const email = document.getElementById('login-email').value.trim();
-  const pass  = document.getElementById('login-pass').value;
-  const errEl = document.getElementById('login-error');
-  if(!email||!pass){ showLoginError('Completa todos los campos.'); return; }
+  const emailEl = document.getElementById('login-email');
+  const passEl  = document.getElementById('login-pass');
+  const email   = emailEl.value.trim();
+  const pass    = passEl.value.trim();
+  const btn     = document.querySelector('.btn-login');
+  document.getElementById('login-error').style.display = 'none';
+  if(!email || !pass) { showLoginError('Completa todos los campos.'); return; }
+  btn.textContent = 'Entrando...';
+  btn.disabled = true;
   auth.signInWithEmailAndPassword(email, pass)
-    .catch(e => showLoginError(friendlyError(e.code)));
+    .catch(e => {
+      const msgs = {
+        'auth/user-not-found': 'Correo no registrado en Firebase.',
+        'auth/wrong-password': 'Contraseña incorrecta.',
+        'auth/invalid-email':  'Correo inválido.',
+        'auth/invalid-credential': 'Correo o contraseña incorrectos.',
+        'auth/too-many-requests': 'Demasiados intentos. Espera unos minutos.',
+        'auth/network-request-failed': 'Error de red. Verifica tu conexión.',
+      };
+      showLoginError(msgs[e.code] || 'Error: ' + e.code);
+      btn.textContent = 'Entrar al panel';
+      btn.disabled = false;
+    });
 }
 
 function doLogout() {
