@@ -343,6 +343,14 @@ function doLogin() {
   btn.textContent = 'Entrando...';
   btn.disabled = true;
   auth.signInWithEmailAndPassword(email, pass)
+    .then(result => {
+      // Manually show admin panel in case onAuthStateChanged is slow
+      document.getElementById('login-wrap').style.display = 'none';
+      document.getElementById('admin-wrap').style.display = 'block';
+      document.getElementById('admin-email-label').textContent = result.user.email;
+      loadEmailConfig();
+      startListener();
+    })
     .catch(e => {
       const msgs = {
         'auth/user-not-found': 'Correo no registrado en Firebase.',
