@@ -1,1 +1,343 @@
+<!DOCTYPE html>
 
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CiudadAlerta — Panel Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>
+firebase.initializeApp({
+  apiKey: "AIzaSyDwRzvyVX55-km767B3SMfb5voCM_wrnJg",
+  authDomain: "denuncia-ciudadana-11d82.firebaseapp.com",
+  projectId: "denuncia-ciudadana-11d82",
+  storageBucket: "denuncia-ciudadana-11d82.firebasestorage.app",
+  messagingSenderId: "71646879069",
+  appId: "1:71646879069:web:c8b77160978c58ecdb9cb4"
+});
+const db = firebase.firestore();
+</script>
+<style>
+:root{--bg:#080c18;--bg2:#0d1120;--card:#111827;--card2:#162032;--border:#1c2d48;--border2:#243650;--accent:#ff4d2e;--accent2:#ffab36;--blue:#4a9eff;--green:#26d87c;--red:#f43f5e;--purple:#a78bfa;--text:#e2e8f4;--text2:#94a3bf;--muted:#4d6080}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1rem}
+.login-box{background:var(--bg2);border:1px solid var(--border2);border-radius:18px;padding:2.5rem;width:100%;max-width:380px}
+.login-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.5rem;text-align:center;margin-bottom:.3rem}
+.login-logo span{color:var(--accent)}
+.login-sub{text-align:center;font-size:.85rem;color:var(--muted);margin-bottom:2rem}
+.flabel{font-size:.72rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.35rem;display:block}
+.finput{background:var(--card);border:1px solid var(--border2);border-radius:9px;padding:.75rem 1rem;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;transition:border-color .2s;width:100%}
+.finput:focus{border-color:var(--accent)}
+.btn-login{background:var(--accent);color:white;border:none;padding:.9rem;border-radius:10px;font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;cursor:pointer;width:100%;margin-top:1.2rem;transition:all .2s}
+.btn-login:hover{background:#ff3318}
+.login-error{background:rgba(244,63,94,.1);border:1px solid rgba(244,63,94,.3);border-radius:8px;padding:.6rem .9rem;font-size:.82rem;color:var(--red);margin-top:.75rem;display:none}
+.admin-wrap{display:none}
+header{display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;height:58px;background:var(--bg2);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;display:flex;align-items:center;gap:.5rem}
+.logo-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent)}
+.logo span{color:var(--accent)}
+.admin-badge{background:rgba(255,77,46,.15);border:1px solid rgba(255,77,46,.3);color:var(--accent);font-size:.7rem;font-weight:700;padding:.2rem .55rem;border-radius:4px;text-transform:uppercase;letter-spacing:.06em}
+.header-right{display:flex;align-items:center;gap:.75rem}
+.user-info{font-size:.82rem;color:var(--text2)}
+.btn-out{background:none;border:1px solid var(--border2);color:var(--muted);padding:.4rem .8rem;border-radius:7px;font-size:.78rem;cursor:pointer;transition:all .2s}
+.btn-out:hover{border-color:var(--red);color:var(--red)}
+.btn-app{background:var(--card);border:1px solid var(--border2);color:var(--blue);padding:.4rem .8rem;border-radius:7px;font-size:.78rem;text-decoration:none;display:inline-flex;align-items:center;gap:.3rem}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;padding:1.5rem;max-width:1200px;margin:0 auto}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.2rem;text-align:center}
+.stat-num{font-family:'Syne',sans-serif;font-weight:800;font-size:2rem;line-height:1}
+.stat-label{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:.3rem}
+.c-total{color:var(--accent)}.c-pend{color:var(--accent2)}.c-rev{color:var(--blue)}.c-res{color:var(--green)}
+.toolbar{display:flex;gap:.75rem;align-items:center;padding:0 1.5rem 1rem;max-width:1200px;margin:0 auto;flex-wrap:wrap}
+.search-box{background:var(--card);border:1px solid var(--border2);border-radius:9px;padding:.6rem 1rem;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.85rem;outline:none;flex:1;min-width:200px}
+.search-box:focus{border-color:var(--accent)}
+.filter-btn{padding:.5rem .9rem;border-radius:20px;border:1px solid var(--border2);font-size:.75rem;font-weight:500;cursor:pointer;background:transparent;color:var(--muted);transition:all .18s}
+.filter-btn:hover{color:var(--text);border-color:rgba(255,255,255,.2)}
+.filter-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(255,77,46,.1)}
+.table-wrap{padding:0 1.5rem 2rem;max-width:1200px;margin:0 auto;overflow-x:auto}
+.table{width:100%;border-collapse:collapse;font-size:.85rem}
+.table th{text-align:left;padding:.7rem 1rem;font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);border-bottom:2px solid var(--border);white-space:nowrap}
+.table td{padding:.85rem 1rem;border-bottom:1px solid var(--border);vertical-align:middle}
+.table tr:hover td{background:rgba(255,255,255,.02)}
+.badge-type{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:.2rem .55rem;border-radius:4px}
+.t-infra{color:#4a9eff;background:rgba(74,158,255,.12)}.t-env{color:#26d87c;background:rgba(38,216,124,.12)}.t-sec{color:#f43f5e;background:rgba(244,63,94,.12)}.t-other{color:#a78bfa;background:rgba(167,139,250,.12)}
+.thumb{width:52px;height:40px;object-fit:cover;border-radius:6px;border:1px solid var(--border)}
+.title-cell{max-width:220px}
+.title-cell strong{display:block;font-weight:600;color:var(--text);margin-bottom:.15rem}
+.title-cell small{font-size:.75rem;color:var(--muted)}
+.coord-cell{font-size:.75rem;color:var(--muted);white-space:nowrap}
+.date-cell{font-size:.78rem;color:var(--text2);white-space:nowrap}
+.status-sel{background:var(--card2);border:1px solid var(--border2);border-radius:7px;padding:.4rem .6rem;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.78rem;cursor:pointer;outline:none}
+.s-pending{color:var(--accent2)!important;border-color:rgba(255,171,54,.3)!important}
+.s-review{color:var(--blue)!important;border-color:rgba(74,158,255,.3)!important}
+.s-resolved{color:var(--green)!important;border-color:rgba(38,216,124,.3)!important}
+.action-btns{display:flex;gap:.4rem}
+.btn-view{background:rgba(74,158,255,.12);border:none;color:var(--blue);padding:.38rem .65rem;border-radius:6px;font-size:.75rem;cursor:pointer}
+.btn-view:hover{background:rgba(74,158,255,.25)}
+.btn-del{background:rgba(244,63,94,.1);border:none;color:var(--red);padding:.38rem .65rem;border-radius:6px;font-size:.75rem;cursor:pointer}
+.btn-del:hover{background:rgba(244,63,94,.25)}
+.setup-banner{background:rgba(255,171,54,.08);border:1px solid rgba(255,171,54,.25);border-radius:12px;padding:1rem 1.5rem;margin:1rem 1.5rem;max-width:1200px;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.setup-banner.hidden{display:none}
+.setup-text{font-size:.85rem;color:var(--accent2)}
+.setup-text strong{display:block;margin-bottom:.2rem}
+.btn-setup{background:var(--accent2);color:#000;border:none;padding:.5rem 1rem;border-radius:7px;font-size:.8rem;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;white-space:nowrap}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:2000;backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:1rem}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:18px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto}
+.modal-head{padding:1.2rem 1.5rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:var(--bg2)}
+.modal-title{font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem}
+.modal-close{background:none;border:none;color:var(--muted);font-size:1.6rem;cursor:pointer}
+.modal-body{padding:1.5rem;display:flex;flex-direction:column;gap:1rem}
+.detail-img{width:100%;height:200px;object-fit:cover;border-radius:10px;border:1px solid var(--border)}
+.detail-row{display:flex;gap:.5rem;font-size:.85rem}
+.detail-label{color:var(--muted);min-width:90px;flex-shrink:0}
+.detail-value{color:var(--text)}
+.map-link{color:var(--blue);text-decoration:none;font-size:.82rem}
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;padding:.9rem 1.4rem;border-radius:10px;font-weight:700;font-size:.88rem;z-index:9999;transform:translateY(100px);opacity:0;transition:all .3s}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.success{background:var(--green);color:#050e0a}
+.toast.error{background:var(--red);color:white}
+.toast.info{background:var(--blue);color:white}
+.empty{text-align:center;padding:4rem 1rem;color:var(--muted)}
+.empty-icon{font-size:2.5rem;margin-bottom:.5rem}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+@media(max-width:768px){.stats-row{grid-template-columns:1fr 1fr}.table th:nth-child(1),.table td:nth-child(1){display:none}}
+</style>
+</head>
+<body>
+
+<div class="login-wrap" id="login-wrap">
+  <div class="login-box">
+    <div class="login-logo">Ciudad<span>Alerta</span></div>
+    <div class="login-sub">Panel de Administración</div>
+    <div>
+      <label class="flabel">Contraseña de administrador</label>
+      <input class="finput" id="login-pass" type="password" placeholder="••••••••" autofocus onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="btn-login" onclick="doLogin()">Entrar al panel</button>
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
+
+<div class="admin-wrap" id="admin-wrap">
+  <header>
+    <div class="logo"><div class="logo-dot"></div>Ciudad<span>Alerta</span><span class="admin-badge">Admin</span></div>
+    <div class="header-right">
+      <a class="btn-app" href="/" target="_blank">🌐 Ver app</a>
+      <span class="user-info">Admin</span>
+      <button class="btn-out" onclick="doLogout()">Cerrar sesión</button>
+    </div>
+  </header>
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-num c-total" id="s-total">–</div><div class="stat-label">Total</div></div>
+    <div class="stat-card"><div class="stat-num c-pend"  id="s-pend">–</div><div class="stat-label">Pendientes</div></div>
+    <div class="stat-card"><div class="stat-num c-rev"   id="s-rev">–</div><div class="stat-label">En revisión</div></div>
+    <div class="stat-card"><div class="stat-num c-res"   id="s-res">–</div><div class="stat-label">Resueltas</div></div>
+  </div>
+  <div class="setup-banner" id="setup-banner">
+    <div class="setup-text"><strong>⚡ Activa las notificaciones por email</strong>Configura EmailJS para recibir un correo por cada nueva denuncia — gratis hasta 200/mes.</div>
+    <button class="btn-setup" onclick="showEmailSetup()">Configurar ahora →</button>
+  </div>
+  <div class="toolbar">
+    <input class="search-box" id="search-box" type="text" placeholder="🔍 Buscar..." oninput="renderTable()">
+    <button class="filter-btn active" onclick="setFilter('all',this)">Todas</button>
+    <button class="filter-btn" onclick="setFilter('pending',this)">Pendientes</button>
+    <button class="filter-btn" onclick="setFilter('review',this)">En revisión</button>
+    <button class="filter-btn" onclick="setFilter('resolved',this)">Resueltas</button>
+  </div>
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Foto</th><th>Tipo</th><th>Denuncia</th><th>Ubicación</th><th>Fecha</th><th>Estado</th><th>Acciones</th></tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <div class="empty" id="empty" style="display:none"><div class="empty-icon">📭</div><p>No hay denuncias.</p></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-detail">
+  <div class="modal">
+    <div class="modal-head"><div class="modal-title" id="detail-title">Detalle</div><button class="modal-close" onclick="closeDetail()">×</button></div>
+    <div class="modal-body" id="detail-body"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-email">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-head"><div class="modal-title">📧 Notificaciones por email</div><button class="modal-close" onclick="document.getElementById('modal-email').classList.remove('open')">×</button></div>
+    <div class="modal-body">
+      <div style="background:rgba(74,158,255,.08);border:1px solid rgba(74,158,255,.2);border-radius:10px;padding:1rem;font-size:.83rem;color:var(--text2);line-height:1.6">
+        <strong style="color:var(--blue);display:block;margin-bottom:.4rem">Pasos:</strong>
+        1. Ve a <a href="https://www.emailjs.com" target="_blank" style="color:var(--blue)">emailjs.com</a> → crea cuenta gratis<br>
+        2. Email Services → Gmail → copia <strong>Service ID</strong><br>
+        3. Email Templates → Create → copia <strong>Template ID</strong><br>
+        4. Account → copia <strong>Public Key</strong>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.9rem;font-size:.78rem;color:var(--muted);font-family:monospace;line-height:1.8">
+        Variables del template:<br>
+        {{tipo}} · {{titulo}} · {{descripcion}}<br>
+        {{direccion}} · {{fecha}} · {{coordenadas}} · {{to_email}}
+      </div>
+      <div style="display:flex;flex-direction:column;gap:.75rem">
+        <div><label class="flabel">Service ID</label><input class="finput" id="ejs-service" placeholder="service_xxx"></div>
+        <div><label class="flabel">Template ID</label><input class="finput" id="ejs-template" placeholder="template_xxx"></div>
+        <div><label class="flabel">Public Key</label><input class="finput" id="ejs-pubkey" placeholder="xxxx"></div>
+        <div><label class="flabel">Tu Gmail</label><input class="finput" id="ejs-email" type="email" placeholder="tu@gmail.com"></div>
+        <button onclick="saveEjs()" style="background:var(--accent);color:white;border:none;padding:.85rem;border-radius:9px;font-family:'Syne',sans-serif;font-weight:700;cursor:pointer;">Guardar y activar</button>
+        <button onclick="testEjs()" style="background:rgba(74,158,255,.12);border:1px solid rgba(74,158,255,.2);color:var(--blue);padding:.7rem;border-radius:9px;font-size:.85rem;cursor:pointer;">Enviar email de prueba</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const TYPES  = {infra:'Infraestructura',env:'Medio Ambiente',sec:'Seguridad',other:'Otro'};
+const ICONS  = {infra:'🔧',env:'🌿',sec:'🚨',other:'📌'};
+const STATES = {pending:'Pendiente',review:'En revisión',resolved:'Resuelto'};
+const PWD    = 'CiudadAlerta2026';
+
+let reports=[], curFilter='all', ejsConf=null, knownIds=null;
+
+// ── AUTH ──
+function doLogin(){
+  const p=document.getElementById('login-pass').value.trim();
+  const err=document.getElementById('login-error');
+  err.style.display='none';
+  if(!p){err.textContent='Escribe la contraseña.';err.style.display='block';return;}
+  if(p===PWD){sessionStorage.setItem('ca_admin','ok');showAdmin();}
+  else{err.textContent='Contraseña incorrecta.';err.style.display='block';}
+}
+function doLogout(){sessionStorage.removeItem('ca_admin');location.reload();}
+function showAdmin(){
+  document.getElementById('login-wrap').style.display='none';
+  document.getElementById('admin-wrap').style.display='block';
+  loadEjsConf();
+  db.collection('denuncias').onSnapshot(snap=>{
+    const ids=new Set(snap.docs.map(d=>d.id));
+    if(knownIds!==null) snap.docs.forEach(d=>{if(!knownIds.has(d.id))sendEmail({id:d.id,...d.data()});});
+    knownIds=ids;
+    reports=snap.docs.map(d=>({id:d.id,...d.data()}));
+    reports.sort((a,b)=>(b.createdAt?.toDate?.()?.getTime()||0)-(a.createdAt?.toDate?.()?.getTime()||0));
+    updateStats(); renderTable();
+  },err=>showToast('Error Firestore: '+err.code,'error'));
+}
+
+// ── STATS ──
+function updateStats(){
+  document.getElementById('s-total').textContent=reports.length;
+  document.getElementById('s-pend').textContent=reports.filter(r=>!r.status||r.status==='pending').length;
+  document.getElementById('s-rev').textContent=reports.filter(r=>r.status==='review').length;
+  document.getElementById('s-res').textContent=reports.filter(r=>r.status==='resolved').length;
+}
+
+// ── TABLE ──
+function setFilter(f,btn){curFilter=f;document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderTable();}
+function renderTable(){
+  const q=document.getElementById('search-box').value.toLowerCase();
+  const list=reports.filter(r=>{
+    const ms=curFilter==='all'||(r.status||'pending')===curFilter;
+    const mq=!q||[r.title,r.address,r.desc,TYPES[r.type],r.subcatLabel].some(v=>v?.toLowerCase().includes(q));
+    return ms&&mq;
+  });
+  const tbody=document.getElementById('tbody');
+  const empty=document.getElementById('empty');
+  if(!list.length){tbody.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  tbody.innerHTML=list.map(r=>{
+    const st=r.status||'pending';
+    return `<tr>
+      <td>${r.photoUrl?`<img class="thumb" src="${r.photoUrl}">`:`<div style="width:52px;height:40px;background:var(--card2);border-radius:6px;display:flex;align-items:center;justify-content:center">${ICONS[r.type]||'📌'}</div>`}</td>
+      <td><span class="badge-type t-${r.type}">${r.subcatLabel||TYPES[r.type]||'–'}</span></td>
+      <td class="title-cell"><strong>${r.title||'Sin título'}</strong><small>${(r.desc||'').slice(0,60)}${(r.desc||'').length>60?'…':''}</small></td>
+      <td class="coord-cell">📍 ${r.address||`${r.lat?.toFixed(4)||''},${r.lng?.toFixed(4)||''}`}</td>
+      <td class="date-cell">${r.date||'–'}</td>
+      <td><select class="status-sel s-${st}" onchange="updateSt('${r.id}',this)">
+        <option value="pending" ${st==='pending'?'selected':''}>⏳ Pendiente</option>
+        <option value="review"  ${st==='review'?'selected':''}>🔍 En revisión</option>
+        <option value="resolved"${st==='resolved'?'selected':''}>✅ Resuelto</option>
+      </select></td>
+      <td><div class="action-btns">
+        <button class="btn-view" onclick="openDetail('${r.id}')">Ver</button>
+        <button class="btn-del"  onclick="delReport('${r.id}','${(r.title||'').replace(/'/g,'')}')">🗑</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+async function updateSt(id,sel){
+  const s=sel.value; sel.className='status-sel s-'+s;
+  try{await db.collection('denuncias').doc(id).update({status:s});showToast('Estado: '+STATES[s],'success');updateStats();}
+  catch(e){showToast('Error: '+e.message,'error');}
+}
+async function delReport(id,title){
+  if(!confirm(`¿Eliminar "${title||id}"?\nNo se puede deshacer.`))return;
+  try{await db.collection('denuncias').doc(id).delete();showToast('Eliminada','success');}
+  catch(e){showToast('Error: '+e.message,'error');}
+}
+
+// ── DETAIL ──
+function openDetail(id){
+  const r=reports.find(x=>x.id===id);if(!r)return;
+  document.getElementById('detail-title').textContent=r.title||'Detalle';
+  document.getElementById('detail-body').innerHTML=`
+    ${r.photoUrl?`<img class="detail-img" src="${r.photoUrl}">` :''}
+    <div class="detail-row"><span class="detail-label">Categoría</span><span class="detail-value">${TYPES[r.type]||'–'}</span></div>
+    <div class="detail-row"><span class="detail-label">Tipo</span><span class="detail-value">${r.subcatIcon||''} ${r.subcatLabel||'–'}</span></div>
+    <div class="detail-row"><span class="detail-label">Descripción</span><span class="detail-value">${r.desc||'Sin descripción'}</span></div>
+    <div class="detail-row"><span class="detail-label">Dirección</span><span class="detail-value">${r.address||'–'}</span></div>
+    <div class="detail-row"><span class="detail-label">Coordenadas</span><span class="detail-value"><a class="map-link" href="https://maps.google.com/?q=${r.lat},${r.lng}" target="_blank">📍 ${r.lat?.toFixed(5)}, ${r.lng?.toFixed(5)} — Google Maps</a></span></div>
+    <div class="detail-row"><span class="detail-label">Fecha</span><span class="detail-value">${r.date||'–'}</span></div>
+    <div class="detail-row"><span class="detail-label">Estado</span><span class="detail-value">${STATES[r.status||'pending']}</span></div>
+    <div class="detail-row"><span class="detail-label">Usuario</span><span class="detail-value">${r.userEmail||'anónimo'}</span></div>`;
+  document.getElementById('modal-detail').classList.add('open');
+}
+function closeDetail(){document.getElementById('modal-detail').classList.remove('open');}
+
+// ── EMAILJS ──
+function loadEjsConf(){
+  const s=localStorage.getItem('ca_ejs');
+  if(!s)return;
+  ejsConf=JSON.parse(s); emailjs.init(ejsConf.pubkey);
+  document.getElementById('setup-banner').classList.add('hidden');
+  document.getElementById('ejs-service').value=ejsConf.service;
+  document.getElementById('ejs-template').value=ejsConf.template;
+  document.getElementById('ejs-pubkey').value=ejsConf.pubkey;
+  document.getElementById('ejs-email').value=ejsConf.email;
+}
+function showEmailSetup(){document.getElementById('modal-email').classList.add('open');}
+function saveEjs(){
+  const c={service:document.getElementById('ejs-service').value.trim(),template:document.getElementById('ejs-template').value.trim(),pubkey:document.getElementById('ejs-pubkey').value.trim(),email:document.getElementById('ejs-email').value.trim()};
+  if(!c.service||!c.template||!c.pubkey||!c.email){showToast('Completa todos los campos','error');return;}
+  localStorage.setItem('ca_ejs',JSON.stringify(c)); ejsConf=c; emailjs.init(c.pubkey);
+  document.getElementById('setup-banner').classList.add('hidden');
+  document.getElementById('modal-email').classList.remove('open');
+  showToast('✅ Notificaciones activadas','success');
+}
+function testEjs(){sendEmail({type:'infra',title:'Prueba',desc:'Test EmailJS',address:'CiudadAlerta',date:new Date().toISOString().slice(0,10),lat:19.432,lng:-99.136});}
+function sendEmail(r){
+  if(!ejsConf)return;
+  emailjs.send(ejsConf.service,ejsConf.template,{to_email:ejsConf.email,tipo:TYPES[r.type]||r.type,titulo:r.title||'Nueva denuncia',descripcion:r.desc||'–',direccion:r.address||'–',fecha:r.date||'–',coordenadas:`${r.lat?.toFixed(5)||''},${r.lng?.toFixed(5)||''}`})
+    .then(()=>showToast('📧 Email enviado','success')).catch(e=>showToast('Error: '+e.text,'error'));
+}
+
+// ── TOAST ──
+function showToast(msg,type='success'){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='toast '+type+' show';
+  setTimeout(()=>t.classList.remove('show'),3500);
+}
+
+// ── INIT ──
+document.addEventListener('DOMContentLoaded',()=>{
+  if(sessionStorage.getItem('ca_admin')==='ok') showAdmin();
+  document.getElementById('modal-detail').addEventListener('click',e=>{if(e.target===document.getElementById('modal-detail'))closeDetail();});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDetail();});
+});
+</script>
+
+</body>
+</html>
