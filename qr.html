@@ -6,52 +6,35 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CiudadAlerta — Código QR</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 <style>
 :root{--bg:#080c18;--bg2:#0d1120;--card:#111827;--border:#1c2d48;--border2:#243650;--accent:#ff4d2e;--text:#e2e8f4;--text2:#94a3bf;--muted:#4d6080}
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;gap:2rem}
-
-.logo{font-family:‘Syne’,sans-serif;font-weight:800;font-size:2rem;display:flex;align-items:center;gap:.6rem}
-.logo span{color:var(–accent)}
-.logo-dot{width:10px;height:10px;border-radius:50%;background:var(–accent);box-shadow:0 0 14px var(–accent)}
-
-.card{background:var(–bg2);border:1px solid var(–border2);border-radius:24px;padding:2.5rem;display:flex;flex-direction:column;align-items:center;gap:1.5rem;max-width:420px;width:100%}
-
-.qr-wrap{background:white;border-radius:16px;padding:1.2rem;display:flex;align-items:center;justify-content:center}
-canvas{display:block}
-
-.url{font-size:.82rem;color:var(–muted);word-break:break-all;text-align:center;background:var(–card);border:1px solid var(–border);border-radius:8px;padding:.6rem 1rem}
-
-.title{font-family:‘Syne’,sans-serif;font-weight:700;font-size:1.1rem;text-align:center}
-.subtitle{font-size:.85rem;color:var(–text2);text-align:center;line-height:1.6}
-
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;gap:1.5rem}
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:2rem;display:flex;align-items:center;gap:.6rem}
+.logo span{color:var(--accent)}
+.logo-dot{width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 0 14px var(--accent)}
+.card{background:var(--bg2);border:1px solid var(--border2);border-radius:24px;padding:2.5rem;display:flex;flex-direction:column;align-items:center;gap:1.5rem;max-width:420px;width:100%}
+.qr-wrap{background:white;border-radius:16px;padding:1.2rem}
+.qr-wrap img{display:block;width:220px;height:220px}
+.tag{display:inline-block;background:rgba(255,77,46,.12);border:1px solid rgba(255,77,46,.25);color:var(--accent);font-size:.7rem;font-weight:700;padding:.2rem .6rem;border-radius:4px;text-transform:uppercase;letter-spacing:.06em}
+.title{font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem;text-align:center}
+.subtitle{font-size:.85rem;color:var(--text2);text-align:center;line-height:1.6}
+.url-box{font-size:.82rem;color:var(--muted);word-break:break-all;text-align:center;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.6rem 1rem;width:100%}
 .btns{display:flex;gap:.75rem;flex-wrap:wrap;justify-content:center}
-.btn{padding:.65rem 1.3rem;border-radius:10px;border:none;font-family:‘Syne’,sans-serif;font-weight:700;font-size:.85rem;cursor:pointer;transition:all .2s}
-.btn-primary{background:var(–accent);color:white}
+.btn{padding:.65rem 1.3rem;border-radius:10px;border:none;font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:.4rem}
+.btn-primary{background:var(--accent);color:white}
 .btn-primary:hover{background:#ff3318}
-.btn-secondary{background:var(–card);border:1px solid var(–border2);color:var(–text2)}
-.btn-secondary:hover{border-color:rgba(255,255,255,.2);color:var(–text)}
-
-.print-card{display:none}
-
-/* ── PRINT VERSION ── */
-@media print {
-body{background:white;color:#000;padding:0;justify-content:flex-start}
-.btns,.url-section{display:none!important}
-.logo{color:#000}
-.logo span{color:#ff4d2e}
-.card{background:white;border:2px solid #eee;border-radius:16px;padding:2rem;max-width:300px;margin:2rem auto}
-.title,.subtitle{color:#000}
-.qr-wrap{border:1px solid #eee}
-.print-footer{display:block!important;text-align:center;font-size:.75rem;color:#666;margin-top:.5rem}
-.print-card{display:block;text-align:center;margin:0 auto;max-width:340px;padding:1.5rem;border:2px dashed #ccc;border-radius:12px;font-family:sans-serif}
+.btn-secondary{background:var(--card);border:1px solid var(--border2);color:var(--text2)}
+.btn-secondary:hover{border-color:rgba(255,255,255,.2);color:var(--text)}
+@media print{
+  body{background:white;color:#000}
+  .btns{display:none}
+  .logo{color:#000}
+  .logo span{color:#ff4d2e}
+  .card{background:white;border:2px solid #eee}
+  .subtitle,.url-box{color:#555}
 }
-
-.print-footer{display:none}
-.tag{display:inline-block;background:rgba(255,77,46,.12);border:1px solid rgba(255,77,46,.25);color:var(–accent);font-size:.7rem;font-weight:700;padding:.2rem .6rem;border-radius:4px;text-transform:uppercase;letter-spacing:.06em}
 </style>
-
 </head>
 <body>
 
@@ -65,38 +48,28 @@ body{background:white;color:#000;padding:0;justify-content:flex-start}
   <div class="title">Reporta problemas en tu comunidad</div>
   <div class="subtitle">Escanea el código QR con tu celular para acceder a CiudadAlerta y reportar incidentes en tiempo real.</div>
   <div class="qr-wrap">
-    <canvas id="qr-canvas"></canvas>
+    <img id="qr-img" src="" alt="Código QR CiudadAlerta">
   </div>
-  <div class="url" id="url-display">ciudadalerta.juanmdelaconcha.workers.dev</div>
+  <div class="url-box">ciudadalerta.juanmdelaconcha.workers.dev</div>
   <div class="btns">
-    <button class="btn btn-primary" onclick="downloadQR()">⬇ Descargar PNG</button>
+    <a id="download-btn" class="btn btn-primary" download="ciudadalerta-qr.png">⬇ Descargar PNG</a>
     <button class="btn btn-secondary" onclick="window.print()">🖨 Imprimir</button>
-    <button class="btn btn-secondary" onclick="copyURL()">📋 Copiar URL</button>
+    <button class="btn btn-secondary" onclick="copyURL(this)">📋 Copiar URL</button>
   </div>
-  <div class="print-footer">ciudadalerta.juanmdelaconcha.workers.dev</div>
 </div>
 
 <script>
 const APP_URL = 'https://ciudadalerta.juanmdelaconcha.workers.dev';
+const QR_API  = 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=10&data=' + encodeURIComponent(APP_URL);
 
-QRCode.toCanvas(document.getElementById('qr-canvas'), APP_URL, {
-  width: 220,
-  margin: 1,
-  color: { dark: '#000000', light: '#ffffff' },
-  errorCorrectionLevel: 'H'
-}, err => { if(err) console.error(err); });
+const img = document.getElementById('qr-img');
+img.src = QR_API;
+img.onload = () => {
+  document.getElementById('download-btn').href = QR_API;
+};
 
-function downloadQR() {
-  const canvas = document.getElementById('qr-canvas');
-  const link = document.createElement('a');
-  link.download = 'ciudadalerta-qr.png';
-  link.href = canvas.toDataURL('image/png');
-  link.click();
-}
-
-function copyURL() {
+function copyURL(btn) {
   navigator.clipboard.writeText(APP_URL).then(() => {
-    const btn = event.target;
     btn.textContent = '✓ Copiado';
     setTimeout(() => btn.textContent = '📋 Copiar URL', 2000);
   });
