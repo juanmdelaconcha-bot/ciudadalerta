@@ -1,1 +1,56 @@
+<!DOCTYPE html>
 
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CiudadAlerta — Código QR</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#080c18;--bg2:#0d1120;--card:#111827;--border:#1c2d48;--border2:#243650;--accent:#ff4d2e;--text:#e2e8f4;--text2:#94a3bf;--muted:#4d6080}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;gap:1.5rem}
+.logo{font-family:"Syne",sans-serif;font-weight:800;font-size:2rem;display:flex;align-items:center;gap:.6rem}
+.logo span{color:var(--accent)}
+.logo-dot{width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 0 14px var(--accent)}
+.card{background:var(--bg2);border:1px solid var(--border2);border-radius:24px;padding:2.5rem;display:flex;flex-direction:column;align-items:center;gap:1.5rem;max-width:420px;width:100%}
+.qr-wrap{background:white;border-radius:16px;padding:1rem}
+.qr-wrap img{width:240px;height:240px;display:block;image-rendering:pixelated}
+.tag{display:inline-block;background:rgba(255,77,46,.12);border:1px solid rgba(255,77,46,.25);color:var(--accent);font-size:.7rem;font-weight:700;padding:.2rem .6rem;border-radius:4px;text-transform:uppercase;letter-spacing:.06em}
+.title{font-family:"Syne",sans-serif;font-weight:700;font-size:1.1rem;text-align:center}
+.subtitle{font-size:.85rem;color:var(--text2);text-align:center;line-height:1.6}
+.url-box{font-size:.82rem;color:var(--muted);text-align:center;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.6rem 1rem;width:100%;word-break:break-all}
+.btns{display:flex;gap:.75rem;flex-wrap:wrap;justify-content:center}
+.btn{padding:.65rem 1.3rem;border-radius:10px;border:none;font-family:"Syne",sans-serif;font-weight:700;font-size:.85rem;cursor:pointer;transition:all .2s}
+.btn-primary{background:var(--accent);color:white}
+.btn-primary:hover{background:#ff3318}
+.btn-secondary{background:var(--card);border:1px solid var(--border2);color:var(--text2)}
+@media print{body{background:white}.card{background:white;border:2px solid #eee}.btns{display:none}.logo span{color:#ff4d2e}.subtitle,.url-box{color:#555}}
+</style>
+</head>
+<body>
+<div class="logo"><div class="logo-dot"></div>Ciudad<span>Alerta</span></div>
+<div class="card">
+  <span class="tag">Escanea y denuncia</span>
+  <div class="title">Reporta problemas en tu comunidad</div>
+  <div class="subtitle">Escanea el código QR con tu celular para acceder a CiudadAlerta y reportar incidentes en tiempo real.</div>
+  <div class="qr-wrap">
+    <img id="qr-img" src="data:image/png;base64,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" alt="QR CiudadAlerta">
+  </div>
+  <div class="url-box">ciudadalerta.juanmdelaconcha.workers.dev</div>
+  <div class="btns">
+    <a class="btn btn-primary" href="data:image/png;base64,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" download="ciudadalerta-qr.png">⬇ Descargar PNG</a>
+    <button class="btn btn-secondary" onclick="window.print()">🖨 Imprimir</button>
+    <button class="btn btn-secondary" onclick="copyURL(this)">📋 Copiar URL</button>
+  </div>
+</div>
+<script>
+function copyURL(btn) {
+  navigator.clipboard.writeText('https://ciudadalerta.juanmdelaconcha.workers.dev').then(function() {
+    btn.textContent = '✓ Copiado';
+    setTimeout(function() { btn.textContent = '📋 Copiar URL'; }, 2000);
+  });
+}
+</script>
+</body>
+</html>
